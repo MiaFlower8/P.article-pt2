@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Article {
+  id              Int             @id @default(autoincrement())
+  title           String
+  author          String?
+  publication     String?
+  url             String?
+  publishedAt     DateTime?
+  summary         String?
+  fullText        String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  articleThemes   ArticleTheme[]
+  actors          Actor[]
+  theoryAnalyses  TheoryAnalysis[]
+  keywords        ArticleKeyword[]
+}
+
+model Theme {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  description String?
+  colour      String
+  articles    ArticleTheme[]
+}
+
+model ArticleTheme {
+  articleId      Int
+  themeId        Int
+  relevanceScore Int
+  isPrimary      Boolean @default(false)
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  theme   Theme   @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, themeId])
+}
+
+model Actor {
+  id        Int    @id @default(autoincrement())
+  articleId Int
+  name      String
+  actorType String?
+  role      String?
+  influence String?
+  objectives String?
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model TheoryAnalysis {
+  id             Int    @id @default(autoincrement())
+  articleId      Int
+  theory         String
+  relevanceScore  Int
+  explanation    String?
+  evidence       String?
+  counterArgument String?
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model Keyword {
+  id       Int              @id @default(autoincrement())
+  word     String           @unique
+  articles ArticleKeyword[]
+}
+
+model ArticleKeyword {
+  articleId Int
+  keywordId Int
+
+  article  Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  keyword  Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, keywordId])
+}
